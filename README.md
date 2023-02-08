@@ -1,4 +1,4 @@
-<h1>Bellabeat Snart Devuce Analysis</h1>
+<h1>Bellabeat Smart Device Analysis</h1>
 
 
 <h2>Description</h2>
