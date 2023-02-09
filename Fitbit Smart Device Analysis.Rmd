@@ -1,0 +1,313 @@
+---
+title: "Fitbit Smart Device Analysis"
+author: "Dillon I."
+date: '2023-01-29'
+output: html_document
+---
+## 1. Introduction
+
+### 1.1 Main Summary
+**Bellabeat**, a high-tech manufacturer of health-focused smart products for women, has the potential to become a larger player in the global smart device market. The company believes analyzing smart device fitness data could help unlock new growth opportunities. Bellabeat has asked to analyze smart device data to gain insight into how consumers are using their smart devices, and apply it to **one** of their products. The analysis, along with high-level recommendations, will then be presented to the executive team to improve Bellabeat marketing strategy.
+
+### 1.1 Company Characteristics 
+* Manufactures health-focused smart products
+* Collects data on activity, sleep, stress, reproductive health.
+* World-wide company with multiple products
+* Main sales are from online retailers and e-commerce channels from their website.
+* Invested in advertising through radio, out-of-home billboards, print, television, and heavy focus on digital marketing. 
+  + Invests in having a strong social media presence (Google search, Twitter, Facebook, etc.)
+  + Also runs video ads on Youtube and display ads on Google Display Network
+
+## 2. Ask Phase
+Ask questions before doing anything to ensure you understand the business task deliverables. In this case, Bellabeat has asked us: 
+
+* To analyze smart device usage data in order to learn how consumers use **non-Bellabeat** smart devices.
+  1. What are some trends in smart device usage?
+  2. How could these trends apply to Bellabeat customers?
+  3. How could these trends help influence Bellabeat marketing strategy?
+  
+To Answer these:  
+  
+* Produce a report with the following deliverables:
+  1. A clear summary of the business task
+  2. A description of all data sources used
+  3. Documentation of any cleaning or manipulation of data
+  4. A summary of your analysis
+  5. Supporting visualizations and key findings
+  6. Your top high-level content recommendations based on your analysis
+
+Key Tasks:
+
+* Identify business task: 
+  + Analyze smart device usage to gain insight on how customers are already using their smart devices. Then, use this information to provide high level recommendations for how these trends can inform Bellabeat marketing strategy for Bellabeat app. 
+
+* Consider Key Stakeholders:
+  + **Urška Sršen**: Bellabeat’s cofounder and Chief Creative Officer
+  + **Sando Mur**: Mathematician and Bellabeat cofounder; key member of the Bellabeat executive team
+  + **Bellabeat marketing analytics team**: A team of data analysts responsible for collecting, analyzing, and reporting data that helps guide Bellabeat’s marketing strategy. You joined this team six months ago and have been busy learning about Bellabeat’’s mission and business goals — as well as how you, as a junior data analyst,can help Bellabeat achieve them.
+  
+* Choose product focus:
+  + **Bellabeat app**: The Bellabeat app provides users with health data related to their activity, sleep, stress, menstrual cycle, and mindfulness habits. This data can help users better understand their current habits and make healthy decisions. The Bellabeat app connects to their line of smart wellness products.
+  
+## 3. Prepare Phase
+Key tasks:
+
+  * Download data and store it appropriately.
+  * Identify how it’s organized.
+  * Sort and filter the data.
+
+Data obtained from: 
+Mobius. "FitBit Fitness Tracker Data", Version 1. Retrieved 01/29/2023  from https://www.kaggle.com/datasets/arashnic/fitbit. 
+
+
+### 3.1. Load Necessary Packages in R
+```{r}
+## install.packages("tidyverse")
+library(tidyverse)
+```
+
+### 3.2. Import Data to R.
+```{r}
+DailyActivity <- read.csv("C:/Users/issad/Desktop/Personal Projects/Google Certificate Case Studies/Track 1/Case 2/Fitbit_data/Fitabase Data 4.12.16-5.12.16/dailyActivity_merged.csv")
+
+DailyCalories <- read.csv("C:/Users/issad/Desktop/Personal Projects/Google Certificate Case Studies/Track 1/Case 2/Fitbit_data/Fitabase Data 4.12.16-5.12.16/dailyCalories_merged.csv")
+
+DailyIntensities <- read.csv("C:/Users/issad/Desktop/Personal Projects/Google Certificate Case Studies/Track 1/Case 2/Fitbit_data/Fitabase Data 4.12.16-5.12.16/dailyIntensities_merged.csv")
+
+DailySteps <- read.csv("C:/Users/issad/Desktop/Personal Projects/Google Certificate Case Studies/Track 1/Case 2/Fitbit_data/Fitabase Data 4.12.16-5.12.16/dailySteps_merged.csv")
+
+SleepDayData <- read.csv("C:/Users/issad/Desktop/Personal Projects/Google Certificate Case Studies/Track 1/Case 2/Fitbit_data/Fitabase Data 4.12.16-5.12.16/sleepDay_merged.csv")
+
+WeightLog <- read.csv("C:/Users/issad/Desktop/Personal Projects/Google Certificate Case Studies/Track 1/Case 2/Fitbit_data/Fitabase Data 4.12.16-5.12.16/weightLogInfo_merged.csv")
+```
+
+## 4. Process Phase
+Key tasks:
+
+  * Check the data for errors.
+  * Choose your tools.
+  * Transform the data so you can work with it effectively.
+  * Document the cleaning process.
+  
+### 4.1 Explore Data
+```{r}
+## Use str() function to check data types and column names
+str(DailyActivity)
+str(DailyCalories)
+str(DailyIntensities)
+str(DailySteps)
+str(SleepDayData)
+str(WeightLog)
+```
+I noticed that the date column in each dataset were listed as characters rather than dates, so I will correct that here.
+```{r}
+DailyActivity <- transform(DailyActivity, ActivityDate = as.Date(ActivityDate, "%m/%d/%Y"))
+DailyCalories <- transform(DailyCalories, ActivityDay = as.Date(ActivityDay, "%m/%d/%Y"))
+DailyIntensities <- transform(DailyIntensities, ActivityDay = as.Date(ActivityDay, "%m/%d/%Y"))
+DailySteps <- transform(DailySteps, ActivityDay = as.Date(ActivityDay, "%m/%d/%Y"))
+SleepDayData <- transform(SleepDayData, SleepDay = as.Date(SleepDay, "%m/%d/%Y"))
+WeightLog <- transform(WeightLog, Date = as.Date(Date, "%m/%d/%Y"))
+```
+
+
+```{r}
+## Use head() function to look at some data values, could also use glimpse() function
+head(DailyActivity)
+head(DailyCalories)
+head(DailyIntensities)
+head(DailySteps)
+head(SleepDayData)
+head(WeightLog)
+```
+
+Looking at the data, I notice that DailyCalories, DailyIntensities, and DailySteps are also in the DailyActivity dataset. I want to ensure that there are no mistakes that might have been carried over during the data harmonization, so I will continue the processing phase with all the datasets. Once I am sure it is clean, I will drop them in the analysis phase. 
+
+### 4.2 Check for Errors
+
+Identify duplicate data using sum() and duplicated() functions
+```{r}
+sum(duplicated(DailyActivity))
+sum(duplicated(DailyCalories))
+sum(duplicated(DailyIntensities))
+sum(duplicated(SleepDayData))
+sum(duplicated(WeightLog))
+```
+
+Identify NA values in data 
+```{r}
+sum(is.na(DailyActivity))
+sum(is.na(DailyCalories))
+sum(is.na(DailyIntensities))
+sum(is.na(SleepDayData))
+sum(is.na(WeightLog))
+```
+
+### 4.3 Clean Errors
+Remove Duplicates from SleepDayData
+```{r}
+SleepDayData <- unique(SleepDayData)
+sum(duplicated(SleepDayData))
+```
+
+The WeightLog data has many null values in its "fat" column. There isn't really an approach to fix this that would be suitable, so we can leave it as is and simply not use "fat" in our analysis.
+
+### 4.4 Transform 
+I want to add the total number of active minutes to the dailyActivity dataset for anlysis later.
+```{r}
+DailyActivity2 <- DailyActivity %>% mutate(TotalActiveMinutes = rowSums(DailyActivity[,11:13]))
+```
+
+
+## 5. Analyze Phase
+Key tasks:
+
+  * Aggregate your data so it’s useful and accessible.
+  * Organize and format your data.
+  * Perform calculations.
+  * Identify trends and relationships
+  
+### Aggregate Data
+First, I want to find out the averages for each consumer's activity, sleep, and weight in pounds.
+
+```{r}
+DailyActivity2 %>% 
+  select(TotalSteps, TotalDistance, TotalActiveMinutes, SedentaryMinutes, Calories) %>% 
+  summary()
+
+SleepDayData %>% select(TotalMinutesAsleep, TotalTimeInBed) %>% 
+  summary()
+
+WeightLog %>% select(WeightPounds, BMI) %>% 
+  summary()
+```
+### 5.1 Visualize Data to Search for Trends
+```{r}
+StepsVis <- ggplot(DailyActivity2) + 
+  geom_point(mapping = aes(x=TotalSteps,y=Calories, color=TotalSteps)) +
+  geom_smooth(mapping = aes(x=TotalSteps,y=Calories), color="orange") +
+  labs(title = "Total Steps vs Calories Burned", x = "Total Steps Taken",
+      y = "Total Calories Burned", caption = "Data collected By Mobius")
+
+StepsVis
+
+ActivityVis <- ggplot(DailyActivity2) + 
+  geom_point(mapping = aes(x=TotalActiveMinutes/60,y=Calories), color="blue4") +
+  geom_smooth(mapping = aes(x=TotalActiveMinutes/60,y=Calories), color="red") +
+  labs(title = "Total Calorie Consumption vs Hours Active",
+       x = "Total Hours Active", y = "Total Calories Burned",
+       caption = "Data collected By Mobius")
+
+ActivityVis
+
+SleepVis <- ggplot(SleepDayData) + 
+  geom_point(mapping = aes(x=TotalMinutesAsleep/60, y=TotalTimeInBed/60), color = "goldenrod2") +
+  geom_smooth(mapping = aes(x=TotalMinutesAsleep/60, y=TotalTimeInBed/60)) +
+  labs(title = "Hours Asleep vs In Bed", x = "Hours Asleep", y = "Hours In Bed",
+       caption = "Data collected By Mobius")
+
+SleepVis
+
+WeightVis <- ggplot(WeightLog) + 
+  geom_point(mapping = aes(x=WeightPounds, y = BMI), color="red") +
+  geom_smooth(mapping = aes(x=WeightPounds, y = BMI), color="blue1") +
+  labs(title = "Weight In Pounds vs BMI", caption = "Data collected By Mobius") 
+
+WeightVis
+
+ManualReportVis <- ggplot(WeightLog) +
+  geom_bar(mapping = aes(x=IsManualReport,fill = IsManualReport)) +
+  labs(title = "Number of Manual Reports vs Automatic Reports", y="Count",
+       caption = "Data collected By Mobius")
+
+ManualReportVis
+```
+
+The Weight vs BMI visual is concerning for me for two reasons.
+
+  1. There are only 67 data points, meaning there might not be enough data for this analysis to be accurate.
+  2. We see in the visual that there is a downward trend at around 150 pounds showing that for some instances at higher weight there is lower BMI. This is inconsistent with what our regression suggests. 
+  
+Due to these reasons, I will not provide recommendations about Weight and BMI unless I am provided more data.
+
+## 6. Share Phase
+Key tasks:
+
+  * Determine the best way to share your findings.
+  * Create effective data visualizations.
+  * Present your findings.
+  * Ensure your work is accessible.
+
+### Add Annotations to Visuals
+```{r}
+StepsVis <- StepsVis + 
+  annotate("text", x=28000, y=1500, label= "As total steps taken increases,",
+           color="purple", fontface="bold",size=3.5) + 
+  annotate("text", x=28000, y=1300, label= "more calories are burned.",
+             color="purple", fontface="bold",size=3.5) +
+  annotate("text", x=15000, y=500, label="Most users take between 0-15,000",
+             color="purple", fontface="bold",size=3.5) +
+  annotate("text", x=15000, y=300, label="(avg 7638) steps and burn 1,000-3,000",
+             color="purple", fontface="bold",size=3.5) +
+  annotate("text", x=15000, y=100, label="(avg 2304) calories.",
+             color="purple", fontface="bold",size=3.5)
+
+ActivityVis <- ActivityVis +
+  annotate("text", x=1, y=4800,label="As activity increases,",
+             color="purple", fontface="bold",size=3.5) +
+  annotate("text", x=1, y=4600, label="more calories are burned.",
+             color="purple", fontface="bold",size=3.5) +
+  annotate("text", x=7.5, y=900, label="Users on average are active for",
+             color="purple", fontface="bold",size=3.5) +
+  annotate("text", x=7.5, y=700, label="3.8 hours and burn 2304 calories.",
+             color="purple", fontface="bold",size=3.5)
+
+SleepVis <- SleepVis +
+  annotate("text", x=3, y=14.5, label="Generally, users get out",
+           color="purple", fontface="bold",size=3.5) +
+  annotate("text", x=3, y=13.8, label="of bed shortly after waking up.",
+           color="purple", fontface="bold",size=3.5) +
+  annotate("text", x=10, y=3.5, label="Users who get 7-9 hours",
+           color="purple", fontface="bold",size=3.5) +
+  annotate("text", x=10, y=2.8, label="of sleep spend less time in bed.",
+           color="purple", fontface="bold",size=3.5)
+
+WeightVis <- WeightVis + 
+  annotate("text", x=150, y=45, label="Generally, as user weight increases,",
+           color="purple", fontface="bold",size=3.5) +
+  annotate("text", x=150, y=43.5, label="so does their BMI.",
+           color="purple", fontface="bold",size=3.5) 
+
+ManualReportVis <- ManualReportVis + 
+  annotate("text", x="FALSE", y=40, label="More users manually report weight",
+           color="purple", fontface="bold",size=3.5) +
+  annotate("text", x="FALSE", y=38, label="than automatically report.",
+           color="purple", fontface="bold",size=3.5) 
+```
+### 6.1 Display New Visuals
+```{r}
+StepsVis
+ActivityVis
+SleepVis
+WeightVis
+ManualReportVis
+```
+
+## 7. Act Phase
+Key tasks:
+
+  * Create your portfolio.
+  * Add your case study.
+  * Practice presenting your case study to a friend or family member
+
+### 7.1 Recommendations
+
+I would recommend Bellabeat do the following:
+
+  * Focus their marketing towards relatively active people such as gym members, athletes, employed people, etc.
+  * Implement a feature that notifies the user if they are on track to meet average steps and calories burnt.
+  * Provide a daily reminder before bed for users to get 7-9 hours of sleep so they are more likely to get out of bed quickly the following morning. 
+  * Implement a notification feature that reminds users to track their weight, or improve on the automatic tracking system in comparison to the fitbit. 
+
+## Citations
+
+Mobius. "FitBit Fitness Tracker Data", Version 1. Retrieved 01/29/2023  from https://www.kaggle.com/datasets/arashnic/fitbit. 
